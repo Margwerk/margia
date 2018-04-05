@@ -5,35 +5,6 @@ import dk.mzw.scalasprites.SpriteCanvas.{BoundingBox, Display}
 
 class Game(display: Display, sprites : Sprites, boundingBox: BoundingBox, mouse: Mouse, keys : Keys) {
 
-    private def makeState() = {
-        val walls = (for{
-            x <- -10 to 10
-            y <- -10 to 10
-            if x == 10 || x == -10 || y == 10 || y == -10
-        } yield Vector2(x, y)).toList
-
-        val monsters = for(_ <- 1 to 10) yield {
-            Monster(
-                position = Vector2(
-                    Math.floor((Math.random() - 0.5) * 18) + 1,
-                    Math.floor((Math.random() - 0.5) * 18) + 1
-                ),
-                health = 10,
-                maxHealth = 10,
-            )
-        }
-
-        State(
-            player = Player(
-                position = Vector2(0, 0),
-                health = 10,
-                maxHealth = 10,
-            ),
-            monsters = monsters.toList,
-            walls = walls
-        )
-    }
-
     private var state = makeState()
 
     def update(delta: Double, t : Double) : Unit = {
@@ -75,13 +46,42 @@ class Game(display: Display, sprites : Sprites, boundingBox: BoundingBox, mouse:
             display.add(sprites.wall, p.x, p.y)
         }
 
-        display.add(sprites.player(state.player.health / state.player.maxHealth), state.player.position.x, state.player.position.y)
+        display.add(sprites.player(state.player.health / state.player.maxHealth)(t), state.player.position.x, state.player.position.y)
 
         state.monsters.foreach{ m =>
             display.add(sprites.monster(m.health / m.maxHealth), m.position.x, m.position.y)
         }
 
         display.draw((0, 0, 0, 1), h, state.player.position.x, state.player.position.y)
+    }
+
+    private def makeState() = {
+        val walls = (for{
+            x <- -10 to 10
+            y <- -10 to 10
+            if x == 10 || x == -10 || y == 10 || y == -10
+        } yield Vector2(x, y)).toList
+
+        val monsters = for(_ <- 1 to 10) yield {
+            Monster(
+                position = Vector2(
+                    Math.floor((Math.random() - 0.5) * 18) + 1,
+                    Math.floor((Math.random() - 0.5) * 18) + 1
+                ),
+                health = 10,
+                maxHealth = 10,
+            )
+        }
+
+        State(
+            player = Player(
+                position = Vector2(0, 0),
+                health = 10,
+                maxHealth = 10,
+            ),
+            monsters = monsters.toList,
+            walls = walls
+        )
     }
 
 }

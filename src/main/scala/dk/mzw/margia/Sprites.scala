@@ -1,43 +1,53 @@
 package dk.mzw.margia
 
-import dk.mzw.scalashading.Language.{Animation, Image, R, Vec2, Vec3, rgba}
-import dk.mzw.scalashading.Math
-import dk.mzw.scalashading.util.Prelude
-import dk.mzw.scalashading.util.Prelude.gaussianOne
-import dk.mzw.scalasprites.SpriteCanvas.{Blending, Loader}
+import dk.mzw.scalashading.Language._
+import dk.mzw.scalashading.Math._
+import dk.mzw.scalashading.util.Prelude._
+import dk.mzw.scalasprites.SpriteCanvas.{CustomShader, Loader}
 
 class Sprites(loader : Loader) {
 
-    val player = loader.apply({health => x : R => y : R =>
-        for {
-            i <- 1 - Math.min(1, Math.floor(Math.distance(Vec2(0, 0), Vec2(x, y))))
-        } yield Prelude.hsva(0, 1 - health, 0.9, i)
-    } : Animation)
-
-    val monster = loader.apply({health => x : R => y : R =>
-        for {
-            i <- 1 - Math.min(1, Math.floor(Math.max(x, y)))
-        } yield Prelude.hsva(0, 1 - health, 0.6, i)
-    } : Animation)
-
-    val grid = loader.apply({t => x : R => y : R =>
-        for {
-            //b <- 1 - Math.min(1, Math.floor(Math.distance(Vec2(0, 0), Vec2(x, y))))
-            d <- Math.min(Math.distance(Prelude.round(x), x), Math.distance(Prelude.round(y), y))
-            i1 <- Math.smoothstep(0.02, 0.01, d)
-            d5 <- Math.min(Math.distance(Prelude.round(x * 0.2), x * 0.2), Math.distance(Prelude.round(y * 0.2), y * 0.2))
-            i5 <- Math.smoothstep(0.02 * 0.2, 0.01 * 0.2, d5)
-            d10 <- Math.min(Math.distance(Prelude.round(x * 0.1), x * 0.1), Math.distance(Prelude.round(y * 0.1), y * 0.1))
-            i10 <- Math.smoothstep(0.02 * 0.1, 0.01 * 0.1, d10)
-            i <- i1 * 0.1 + i5 * 0.2 + i10 * 0.3
-        } yield Prelude.hsva(
-            0, //t * 0.05 + i * 0.5,
-            0.5 + i * 0.5,
-            i,
-            1
-        )
-    } : Animation)
-
     val wall = loader("assets/floor.png", repeat = true)
 
+    val player : Double => Double => CustomShader = {
+
+        def shader(health : R)(t : R)(x : R)(y : R) = {
+            val s = sinOne(t*4)
+            val i = 1 - min(1, floor(distance(Vec2(0, 0), Vec2(x, y)) + s * 0.1))
+            hsva(0, 1 - health, 0.7 + s * 0.3, i)
+        }
+
+        loader.u2(shader)
+    }
+
+    val monster : Double => CustomShader = {
+
+        def shader(health : R)(x : R)(y : R) = {
+            val i = 1 - min(1, floor(max(x, y)))
+            hsva(0, 1 - health, 0.6, i)
+        }
+
+        loader.u1(shader)
+    }
+
+    val grid : Double => CustomShader = {
+
+        def shader(t : R)(x : R)(y : R) = {
+            val d = min(distance(round(x), x), distance(round(y), y))
+            val i1 = smoothstep(0.02, 0.01, d)
+            val d5 = min(distance(round(x * 0.2), x * 0.2), distance(round(y * 0.2), y * 0.2))
+            val i5 = smoothstep(0.02 * 0.2, 0.01 * 0.2, d5)
+            val d10 = min(distance(round(x * 0.1), x * 0.1), distance(round(y * 0.1), y * 0.1))
+            val i10 = smoothstep(0.02 * 0.1, 0.01 * 0.1, d10)
+            val i = i1 * 0.1 + i5 * 0.2 + i10 * 0.3
+            hsva(
+                0, //t * 0.05 + i * 0.5,
+                0.5 + i * 0.5,
+                i,
+                1
+            )
+        }
+
+        loader.u1(shader)
+    }
 }

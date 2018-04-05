@@ -21,11 +21,9 @@ object Main extends JSApp {
             val keys = new Keys()
             val game = new Game(display, sprites, display.boundingBox, mouse, keys)
 
-            // This crazy stuff is done to avoid creating and allocating a new anonymous function for each call to requestAnimationFrame
-            var loopF : Double => Unit = null
-
             var last : Double = secondsElapsed() - 0.01
             def loop(_t : Double) : Unit = {
+                dom.window.requestAnimationFrame(loop)
                 val now = secondsElapsed()
                 val delta = now - last
                 if (delta < 1) {
@@ -34,9 +32,7 @@ object Main extends JSApp {
                     keys.newFrame()
                 }
                 last = now
-                dom.window.requestAnimationFrame(loopF)
             }
-            loopF = loop
             loop(0)
         }
     }
