@@ -9,6 +9,13 @@ class Sprites(loader : Loader) {
 
     val wall = loader("assets/floor.png", repeat = true)
 
+    val room : CustomShader = {
+
+        def shader(x : R)(y : R) = rgba(0.5, 0.5, 0, 1)
+
+        loader.apply(shader _)
+    }
+
     val player : Double => Double => CustomShader = {
 
         def shader(health : R)(t : R)(x : R)(y : R) = {

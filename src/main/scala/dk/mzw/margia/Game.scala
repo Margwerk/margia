@@ -1,6 +1,6 @@
 package dk.mzw.margia
 
-import dk.mzw.margia.utility.{Keys, Mouse, Vector2}
+import dk.mzw.margia.utility.{Keys, Mouse, Rectangle, Vector2}
 import dk.mzw.scalasprites.SpriteCanvas.{BoundingBox, Display}
 
 class Game(display: Display, sprites : Sprites, boundingBox: BoundingBox, mouse: Mouse, keys : Keys) {
@@ -49,6 +49,17 @@ class Game(display: Display, sprites : Sprites, boundingBox: BoundingBox, mouse:
             imageHeight = h
         )
 
+        // Rooms
+        state.rooms.foreach{ room =>
+            display.add(
+                image = sprites.room,
+                x = room.p1.x + room.width * 0.5,
+                y = room.p1.y + room.height * 0.5,
+                width = room.width,
+                height = room.height
+            )
+        }
+
         state.walls.foreach{p =>
             display.add(sprites.wall, p.x, p.y)
         }
@@ -72,13 +83,15 @@ class Game(display: Display, sprites : Sprites, boundingBox: BoundingBox, mouse:
         val monsters = for(_ <- 1 to 10) yield {
             Monster(
                 position = Vector2(
-                    Math.floor((Math.random() - 0.5) * 18) + 1,
-                    Math.floor((Math.random() - 0.5) * 18) + 1
+                    Math.floor((Math.random() - 0.5) * 18).toInt + 1,
+                    Math.floor((Math.random() - 0.5) * 18).toInt + 1
                 ),
                 health = 10,
                 maxHealth = 10,
             )
         }
+
+        val generator = new GenerateDungeon(Rectangle(Vector2(-10, -10), Vector2(10, 10)))
 
         State(
             player = Player(
@@ -87,7 +100,8 @@ class Game(display: Display, sprites : Sprites, boundingBox: BoundingBox, mouse:
                 maxHealth = 10,
             ),
             monsters = monsters.toList,
-            walls = walls
+            walls = walls,
+            rooms = generator.makeRooms(0.2)
         )
     }
 
