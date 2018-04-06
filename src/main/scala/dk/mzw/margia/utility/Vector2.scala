@@ -1,6 +1,9 @@
 package dk.mzw.margia.utility
 
-case class Vector2(x : Double, y : Double) {
+case class Vector2(
+    x : Double,
+    y : Double
+) {
     def +(dx : Double, dy : Double) = Vector2(x = x + dx, y = y + dy)
     def +(v : Vector2) = Vector2(x = x + v.x, y = y + v.y)
     def -(v : Vector2) = Vector2(x = x - v.x, y = y - v.y)

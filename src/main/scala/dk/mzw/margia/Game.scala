@@ -14,14 +14,21 @@ class Game(display: Display, sprites : Sprites, boundingBox: BoundingBox, mouse:
 
         if(dx != 0 || dy != 0) {
             val newPosition = state.player.position + (dx, dy)
-            if(! state.walls.contains(newPosition)) {
-                state.monsters.find(_.position == newPosition) match {
-                    case Some(m) =>
-                        m.health -= Math.random() * 4
-                        if(m.health <= 0) state.monsters = state.monsters.filter(_ != m)
+            val collision = state.walls.contains(newPosition)
+            if(! collision) {
+                state.monsters.find(monster => monster.position == newPosition) match {
+                    case Some(blockingMonster) =>
+                        blockingMonster.health -= Math.random() * 4
+                        if(blockingMonster.health <= 0) {
+                            val nonBlockingMonsters = state.monsters.filter(m => m != blockingMonster)
+                            state.monsters = nonBlockingMonsters
+                        }
 
                         state.player.health -= Math.random() * 1
-                        if(state.player.health <= 0) state = makeState()
+                        if(state.player.health <= 0) {
+                            // You are dead -> new game
+                            state = makeState()
+                        }
                     case None =>
                         state.player.position = newPosition
                 }
